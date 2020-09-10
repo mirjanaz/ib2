@@ -23,6 +23,7 @@ import java.text.ParseException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.mail.internet.MimeMessage;
+import javax.sql.rowset.spi.XmlWriter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,6 +58,7 @@ import model.mailclient.MailBody;
 import util.Base64;
 import util.GzipUtil;
 import util.IVHelper;
+import util.cuvanjeXML;
 import support.MailHelper;
 import support.MailWritter;
 
@@ -166,9 +168,17 @@ public class WriteMailClient extends MailClient {
 
 			Document doc = docBuilder.newDocument();
 			Element rootElement = doc.createElement("mail");
+			Element sub = doc.createElement("Subject");
+			Element mailBody = doc.createElement("Body");
 
-			rootElement.setTextContent(body);
 			doc.appendChild(rootElement);
+			rootElement.appendChild(sub);
+			rootElement.appendChild(mailBody);
+			sub.setTextContent(subject);
+			mailBody.setTextContent(body);	
+			
+			cuvanjeXML.cuvanjeXMLa(subject, body);
+		
 
 			// dokument pre enkripcije u string formatu
 			String xml = xmlUSring(doc);
@@ -186,6 +196,7 @@ public class WriteMailClient extends MailClient {
 			//potpisuje dokument
 			System.out.println("Signing....");
 			doc = signDocument(doc, pk, certSig);
+			
 			
 			
 			
@@ -218,7 +229,7 @@ public class WriteMailClient extends MailClient {
 						
 			// kreiranje EncryptedKey objekta koji sadrzi  enkriptovan tajni (session) kljuc
 			EncryptedKey encryptedKey = keyCipher.encryptKey(doc, secretKey);
-						
+			System.out.println("Kriptovan tajni kljuc: " + encryptedKey);
 			// u EncryptedData element koji se kriptuje kao KeyInfo stavljamo
 			// kriptovan tajni kljuc
 			// ovaj element je korenski element XML enkripcije
@@ -235,19 +246,22 @@ public class WriteMailClient extends MailClient {
 						
 			// postavljamo KeyInfo za element koji se kriptuje
 			encryptedData.setKeyInfo(keyInfo);
+			//kriptovati sadrzaj dokumenta
+			NodeList mails = doc.getElementsByTagName("mail");
+			Element mail = (Element) mails.item(0);
 			
 			//TODO 6: kriptovati sadrzaj dokumenta
-			xmlCipher.doFinal(doc, rootElement, true);
+			xmlCipher.doFinal(doc, mail, true);
 
 			// Slanje poruke
 			String encryptedXml = xmlUSring(doc);
 			System.out.println("Email posle enkripcije: " + encryptedXml);
 			
 
-			MimeMessage mimeMessage = MailHelper.createMimeMessage(reciever, subject, encryptedXml);
+			MimeMessage mimeMessage = MailHelper.createMimeMessage(reciever, encryptedXml);
 			MailWritter.sendMessage(service, "me", mimeMessage);
 			//sacuvati xml dokument jos treba
-
+			
     		
         	
         }catch (Exception e) {

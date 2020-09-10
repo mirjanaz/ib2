@@ -12,14 +12,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class KreiranjeXML {
-	String putanja = "C:/Users/mirja/git/IB-projekat/Mail Client V2/data";
-	public String getPutanju(){
-		return putanja;
-	}
-	public File cuvanjeMejlaXML(String primaoc,String zaglavlje, String sms){
-		File xmlFile = null;
+public class cuvanjeXML {
+	
+	
+	public static void cuvanjeXMLa (String zaglavlje, String sms){
 		
+		String putanja = "./data/email.xml";
 		try {
 			DocumentBuilderFactory df= DocumentBuilderFactory.newInstance();
 		    DocumentBuilder db = df.newDocumentBuilder();
@@ -27,15 +25,11 @@ public class KreiranjeXML {
 		    Element rootElement = doc.createElement("Mejl");
 		    doc.appendChild(rootElement);
 		   
-		    Element p = doc.createElement("Primaoc");
-		    p.appendChild(doc.createTextNode(primaoc));
-		    rootElement.appendChild(p);
-		    
-		    Element zg = doc.createElement("Zaglavlje");
+		    Element zg = doc.createElement("subject");
 		    zg.appendChild(doc.createTextNode(zaglavlje));
 		    rootElement.appendChild(zg);
 		    
-		    Element pr = doc.createElement("Porukica");
+		    Element pr = doc.createElement("body");
 		    pr.appendChild(doc.createTextNode(sms));
 		    rootElement.appendChild(pr);
 		    
@@ -43,17 +37,17 @@ public class KreiranjeXML {
 		    TransformerFactory tF = TransformerFactory.newInstance();
 		    Transformer transformer = tF.newTransformer();
 		    DOMSource source = new DOMSource(doc);
-		    StreamResult result = new StreamResult(new File(putanja +"mejlXML.xml"));
+		    StreamResult result = new StreamResult(new File(putanja));
 		    transformer.transform(source, result);
 		    System.out.println("Sacuvan");
 			
-			xmlFile= new File(putanja+"mejlXML.xml");
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			xmlFile = null;
 			
 		}
-		return xmlFile;
+		
 		
 	}
 	
