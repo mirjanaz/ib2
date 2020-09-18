@@ -44,7 +44,7 @@ public class cuvanjeXML {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			xmlFile = null;
+			
 			
 		}
 		
